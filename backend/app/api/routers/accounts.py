@@ -27,7 +27,12 @@ def create_account(account: schemas.AccountCreate, db: Session = Depends(get_db)
     """
     Create a new account entry.
     """
-    db_account = models.Account(**account.dict())
+    try:
+        account_payload = account.model_dump()
+    except AttributeError:  # pragma: no cover - compatibility shim for Pydantic v1
+        account_payload = account.dict()
+
+    db_account = models.Account(**account_payload)
     db.add(db_account)
     db.commit()
     db.refresh(db_account)
